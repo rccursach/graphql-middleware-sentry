@@ -30,7 +30,7 @@ const resolvers = {
 }
 
 const sentryMiddleware = sentry({
-  dns: SENTRY_DNS
+  dsn: SENTRY_DSN
 })
 
 const server = GraphQLServer({
