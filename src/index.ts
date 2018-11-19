@@ -3,7 +3,7 @@ import * as _ from 'lodash'
 
 import { IMiddlewareFunction } from 'graphql-middleware/dist/types'
 
-interface Extra {
+export interface Extra {
   name: string
   path: string
 }
