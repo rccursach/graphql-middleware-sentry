@@ -36,7 +36,7 @@ const sentryMiddleware = sentry({
     release: process.env.npm_package_version
   },
   extras: [
-    { name:'body', path: 'body'},
+    { name:'body', path: 'request.body'},
     { name:'origin', path: 'request.headers.origin'},
     { name:'user-agent', path: "request.headers['user-agent']"}
   ]
