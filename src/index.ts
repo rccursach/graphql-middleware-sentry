@@ -1,53 +1,47 @@
 import * as Sentry from '@sentry/node'
-import * as _ from 'lodash'
 
 import { IMiddlewareFunction } from 'graphql-middleware/dist/types'
 
-export interface Extra {
-  name: string
-  path: string
-}
+export type ExceptionScope<Context> = (
+  scope: Sentry.Scope,
+  error: any,
+  context: Context,
+) => void
 
 // Options for graphql-middleware-sentry
-export interface Options {
-  dsn: string
-  config?: Sentry.NodeOptions
-  extras?: Extra[]
+export interface Options<Context> {
+  config: Sentry.NodeOptions
+  withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
 }
 
-export class SentryError extends Error {
-  constructor(...props) {
-    super(...props)
-  }
-}
+export class SentryError extends Error {}
 
-export const sentry = ({
-  dsn,
+export const sentry = <Context>({
   config = {},
-  extras = [],
+  withScope,
   captureReturnedErrors = false,
   forwardErrors = false,
-}: Options): IMiddlewareFunction => {
+}: Options<Context>): IMiddlewareFunction => {
   // Check if Sentry DSN is present
-  if (!dsn) {
+  if (!config.dsn) {
     throw new SentryError(`Missing dsn parameter in configuration.`)
   }
 
   // Init Sentry
-  Sentry.init({ dsn, ...config })
+  Sentry.init(config)
 
   // Return middleware resolver
   return async function(resolve, parent, args, ctx, info) {
     try {
       const res = await resolve(parent, args, ctx, info)
       if (captureReturnedErrors && res instanceof Error) {
-        captureException(res, ctx, extras)
+        captureException(res, ctx, withScope)
       }
       return res
     } catch (err) {
-      captureException(err, ctx, extras)
+      captureException(err, ctx, withScope)
 
       // Forward error
       if (forwardErrors) {
@@ -57,11 +51,13 @@ export const sentry = ({
   }
 }
 
-function captureException(err, ctx, extras: Extra[]) {
+function captureException<Context>(
+  err,
+  ctx: Context,
+  withScope: ExceptionScope<Context>,
+) {
   Sentry.withScope(scope => {
-    extras.forEach(extra => {
-      scope.setExtra(extra.name, _.get(ctx, extra.path))
-    })
+    withScope(scope, err, ctx)
     Sentry.captureException(err)
   })
 }

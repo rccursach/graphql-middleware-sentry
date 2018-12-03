@@ -19,8 +19,7 @@
   },
   "author": "Matic Zavadlal <matic.zavadlal@gmail.com>",
   "dependencies": {
-    "@sentry/node": "^4.3.2",
-    "lodash": "^4.17.11"
+    "@sentry/node": "^4.3.2"
   },
   "devDependencies": {
     "@types/lodash": "4.14.118",

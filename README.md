@@ -30,16 +30,19 @@ const resolvers = {
 }
 
 const sentryMiddleware = sentry({
-  dsn: process.env.SENTRY_DSN
   config: {
+    dsn: process.env.SENTRY_DSN,
     environment: process.env.NODE_ENV,
     release: process.env.npm_package_version
   },
-  extras: [
-    { name:'body', path: 'request.body'},
-    { name:'origin', path: 'request.headers.origin'},
-    { name:'user-agent', path: "request.headers['user-agent']"}
-  ]
+  withScope: (scope, error, context) => {
+    scope.setUser({
+      id: context.authorization.userId,
+    });
+    scope.setExtra('body', context.request.body)
+    scope.setExtra('origin', ctx.request.headers.origin)
+    scope.setExtra('user-agent', context.request.headers['user-agent'])
+  },
 })
 
 const server = GraphQLServer({
@@ -54,35 +57,37 @@ serve.start(() => `Server running on http://localhost:4000`)
 ## API & Configuration
 
 ```ts
-export interface Options {
-  dsn: string
-  config?: Sentry.NodeOptions
-  extras?: Extra[]
+export interface Options<Context> {
+  config: Sentry.NodeOptions
+  withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
 }
 
-function sentry(options: Options): IMiddlewareFunction
+function sentry<Context>(options: Options<Context>): IMiddlewareFunction
 ```
 
-### Extra Content
+### Sentry context
+
+To enrich events sent to Sentry, you can modify the [context](https://docs.sentry.io/enriching-error-data/context/?platform=javascript).
+This can be done using the `withScope` configuration option.
+
+The `withScope` option is a function that is called with the current Sentry scope, the error, and the GraphQL Context.
 
 ```ts
-interface Extra {
-  name: string
-  path: string // path from ctx
-}
+type ExceptionScope<Context> = (
+  scope: Sentry.Scope,
+  error: any,
+  context: Context,
+) => void
 ```
-
-The `path` is used to get a value from the context object. It uses [lodash.get](https://lodash.com/docs/4.17.11#get) and it should follow its rules.
 
 ### Options
 
 | property                | required | description                                                                                                                                                                |
 | ----------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dsn`                   | true     | Your [Sentry DSN](https://docs.sentry.io/error-reporting/quickstart/?platform=node#configure-the-sdk)                                                                      |
-| `config`                | false    | [Sentry's config object](https://docs.sentry.io/error-reporting/configuration/?platform=node)                                                                              |
-| `extras`                | false    | [Extra content](https://docs.sentry.io/enriching-error-data/context/?platform=node#extra-context) to send with the captured error.                                         |
+| `config`                | true     | [Sentry's config object](https://docs.sentry.io/error-reporting/configuration/?platform=node)                                                                              |
+| `withScope`             | false    | Function to modify the [Sentry context](https://docs.sentry.io/enriching-error-data/context/?platform=node) to send with the captured error.                               |
 | `captureReturnedErrors` | false    | Capture errors returned from other middlewares, e.g., `graphql-shield` [returns errors](https://github.com/maticzav/graphql-shield#custom-errors) from rules and resolvers |
 | `forwardErrors`         | false    | Should middleware forward errors to the client or block them.                                                                                                              |
 
