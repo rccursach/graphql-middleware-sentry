@@ -22,7 +22,7 @@
     "@sentry/node": "^4.3.2"
   },
   "devDependencies": {
-    "@types/lodash": "4.14.118",
+    "@types/lodash": "4.14.119",
     "@types/node": "10.1.4",
     "graphql": "14.0.2",
     "graphql-middleware": "2.0.2",
