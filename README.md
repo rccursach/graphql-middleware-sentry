@@ -30,7 +30,7 @@ const resolvers = {
 }
 
 const sentryMiddleware = sentry({
-  dsn: process.env.SENTRY_DSN
+  dsn: process.env.SENTRY_DSN,
   config: {
     environment: process.env.NODE_ENV,
     release: process.env.npm_package_version
