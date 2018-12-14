@@ -40,7 +40,7 @@ const sentryMiddleware = sentry({
       id: context.authorization.userId,
     });
     scope.setExtra('body', context.request.body)
-    scope.setExtra('origin', ctx.request.headers.origin)
+    scope.setExtra('origin', context.request.headers.origin)
     scope.setExtra('user-agent', context.request.headers['user-agent'])
   },
 })
