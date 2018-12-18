@@ -1086,10 +1086,10 @@ graceful-fs@^4.1.2, graceful-fs@^4.1.6:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.1.11.tgz#0e8bdfe4d1ddb8854d64e04ea7c00e2a026e5658"
   integrity sha1-Dovf5NHduIVNZOBOp8AOKgJuVlg=
 
-graphql-middleware@2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/graphql-middleware/-/graphql-middleware-2.0.2.tgz#99a3b0ff3f3e3fa66c6ddc8608e6e4eb1d2bb99c"
-  integrity sha512-qDmot+DU2XTRnWS3SJGRUUPQ9jhma9AtUR1GtWnqq3JkzoqzT/dprxS7eszIj0c1gD5UrySpm4yM1fNbQcazwA==
+graphql-middleware@3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/graphql-middleware/-/graphql-middleware-3.0.0.tgz#df498cc2c19ca5936fc67e9e39df6c484dbf4d80"
+  integrity sha512-m1V5G8jTatG8ZbFWLWBqrlVbHNpJv/U15LJ8U3XAoLjxm5HRY9rVXns6I4gigJqUt/0i/xYO7Lk3YkxqHi8QmQ==
   dependencies:
     graphql-tools "^4.0.3"
 
