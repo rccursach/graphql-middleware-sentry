@@ -62,6 +62,7 @@ export interface Options<Context> {
   withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
+  reportError?: (res) => boolean
 }
 
 function sentry<Context>(options: Options<Context>): IMiddlewareFunction
@@ -82,6 +83,32 @@ type ExceptionScope<Context> = (
 ) => void
 ```
 
+### Filtering Out Custom Errors
+
+To filter out custom errors thrown by your server (such as "You Are Not Logged In"), use the `reportError` option and return a boolean for whether or not the error should be
+
+```ts
+class CustomError extends Error {}
+
+const sentryMiddleware = sentry({
+  reportError: (res) => {
+    // you can check the error message strings
+    if (res.message === 'You Are Not Logged In') {
+      return false;
+    }
+
+    // or extend the error type and create a custom error
+    if (res instanceof CustomError) {
+      return false;
+    }
+
+    return true;
+  }
+})
+```
+
+
+
 ### Options
 
 | property                | required | description                                                                                                                                                                |
@@ -90,6 +117,7 @@ type ExceptionScope<Context> = (
 | `withScope`             | false    | Function to modify the [Sentry context](https://docs.sentry.io/enriching-error-data/context/?platform=node) to send with the captured error.                               |
 | `captureReturnedErrors` | false    | Capture errors returned from other middlewares, e.g., `graphql-shield` [returns errors](https://github.com/maticzav/graphql-shield#custom-errors) from rules and resolvers |
 | `forwardErrors`         | false    | Should middleware forward errors to the client or block them.                                                                                                              |
+| `reportError` | false | Function that passes `res` as the parameter and accepts a boolean callback for whether or not the error should be captured
 
 ## License
 

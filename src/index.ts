@@ -14,6 +14,13 @@ export interface Options<Context> {
   withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
+  reportError?: (res) => boolean
+}
+
+function containsIgnoredError(res, ignoredErrors) {
+  ignoredErrors.some(error => {
+    return res instanceof error;
+  });
 }
 
 export class SentryError extends Error {}
@@ -23,6 +30,7 @@ export const sentry = <Context>({
   withScope,
   captureReturnedErrors = false,
   forwardErrors = false,
+  reportError
 }: Options<Context>): IMiddlewareFunction => {
   // Check if Sentry DSN is present
   if (!config.dsn) {
@@ -36,6 +44,11 @@ export const sentry = <Context>({
   return async function(resolve, parent, args, ctx, info) {
     try {
       const res = await resolve(parent, args, ctx, info)
+
+      if (reportError && reportError(res)) {
+        return res;
+      }
+
       if (captureReturnedErrors && res instanceof Error) {
         captureException(res, ctx, withScope)
       }
