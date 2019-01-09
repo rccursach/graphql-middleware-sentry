@@ -85,7 +85,7 @@ type ExceptionScope<Context> = (
 
 ### Filtering Out Custom Errors
 
-To filter out custom errors thrown by your server (such as "You Are Not Logged In"), use the `reportError` option and return a boolean for whether or not the error should be
+To filter out custom errors thrown by your server (such as "You Are Not Logged In"), use the `reportError` option and return a boolean for whether or not the error should be sent to sentry.
 
 ```ts
 class CustomError extends Error {}
