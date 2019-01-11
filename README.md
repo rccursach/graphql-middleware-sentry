@@ -29,12 +29,14 @@ const resolvers = {
   }
 }
 
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+  environment: process.env.NODE_ENV,
+  release: process.env.npm_package_version
+})
+
 const sentryMiddleware = sentry({
-  config: {
-    dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV,
-    release: process.env.npm_package_version
-  },
+  sentryInstance: Sentry,
   withScope: (scope, error, context) => {
     scope.setUser({
       id: context.authorization.userId,
@@ -58,7 +60,7 @@ serve.start(() => `Server running on http://localhost:4000`)
 
 ```ts
 export interface Options<Context> {
-  config: Sentry.NodeOptions
+  sentryInstance: Sentry
   withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
@@ -77,7 +79,7 @@ The `withScope` option is a function that is called with the current Sentry scop
 ```ts
 type ExceptionScope<Context> = (
   scope: Sentry.Scope,
-  error: any,
+  error: Error,
   context: Context,
 ) => void
 ```
@@ -86,7 +88,7 @@ type ExceptionScope<Context> = (
 
 | property                | required | description                                                                                                                                                                |
 | ----------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `config`                | true     | [Sentry's config object](https://docs.sentry.io/error-reporting/configuration/?platform=node)                                                                              |
+| `sentryInstance`        | true     | [Sentry's instance](https://docs.sentry.io/error-reporting/configuration/?platform=node)                                                                                   |
 | `withScope`             | false    | Function to modify the [Sentry context](https://docs.sentry.io/enriching-error-data/context/?platform=node) to send with the captured error.                               |
 | `captureReturnedErrors` | false    | Capture errors returned from other middlewares, e.g., `graphql-shield` [returns errors](https://github.com/maticzav/graphql-shield#custom-errors) from rules and resolvers |
 | `forwardErrors`         | false    | Should middleware forward errors to the client or block them.                                                                                                              |
