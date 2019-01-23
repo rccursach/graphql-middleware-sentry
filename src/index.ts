@@ -1,16 +1,17 @@
-import { Scope } from '@sentry/core'
+import * as Sentry from '@sentry/node'
 
 import { IMiddlewareFunction } from 'graphql-middleware/dist/types'
 
 export type ExceptionScope<Context> = (
-  scope: Scope,
+  scope: Sentry.Scope,
   error: Error,
   context: Context,
 ) => void
 
 // Options for graphql-middleware-sentry
 export interface Options<Context> {
-  sentryInstance: any
+  sentryInstance?: any
+  config?: Sentry.NodeOptions
   withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
@@ -20,13 +21,22 @@ export class SentryError extends Error {}
 
 export const sentry = <Context>({
   sentryInstance = null,
+  config = {},
   withScope,
   captureReturnedErrors = false,
   forwardErrors = false,
 }: Options<Context>): IMiddlewareFunction => {
-  // Check if Sentry DSN is present
-  if (!sentryInstance) {
-    throw new SentryError(`The Sentry instance is missing in the options.`)
+  // Check if either sentryInstance or config.dsn is present
+  if (!sentryInstance && !config.dsn) {
+    throw new SentryError(
+      `Missing the sentryInstance or the dsn parameter in configuration.`,
+    )
+  }
+
+  if (!sentryInstance && config.dsn) {
+    // Init Sentry
+    sentryInstance = Sentry
+    Sentry.init(config)
   }
 
   // Return middleware resolver
