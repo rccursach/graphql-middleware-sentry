@@ -1,6 +1,6 @@
 # graphql-middleware-sentry
 
-[![CircleCI](https://circleci.com/gh/maticzav/graphql-middleware-sentry.svg?style=shield)](https://circleci.com/gh/maticzav/graphql-middleware-sentry)
+[![CircleCI](https://circleci.com/gh/BrunoScheufler/graphql-middleware-sentry.svg?style=shield)](https://circleci.com/gh/BrunoScheufler/graphql-middleware-sentry)
 [![npm version](https://badge.fury.io/js/graphql-middleware-sentry.svg)](https://badge.fury.io/js/graphql-middleware-sentry)
 
 > GraphQL Middleware plugin for Sentry.
