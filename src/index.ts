@@ -4,13 +4,14 @@ import { IMiddlewareFunction } from 'graphql-middleware/dist/types'
 
 export type ExceptionScope<Context> = (
   scope: Sentry.Scope,
-  error: any,
+  error: Error,
   context: Context,
 ) => void
 
 // Options for graphql-middleware-sentry
 export interface Options<Context> {
-  config: Sentry.NodeOptions
+  sentryInstance?: any
+  config?: Sentry.NodeOptions
   withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
@@ -19,45 +20,52 @@ export interface Options<Context> {
 export class SentryError extends Error {}
 
 export const sentry = <Context>({
+  sentryInstance = null,
   config = {},
   withScope,
   captureReturnedErrors = false,
   forwardErrors = false,
 }: Options<Context>): IMiddlewareFunction => {
-  // Check if Sentry DSN is present
-  if (!config.dsn) {
-    throw new SentryError(`Missing dsn parameter in configuration.`)
+  // Check if either sentryInstance or config.dsn is present
+  if (!sentryInstance && !config.dsn) {
+    throw new SentryError(
+      `Missing the sentryInstance or the dsn parameter in configuration.`,
+    )
   }
 
-  // Init Sentry
-  Sentry.init(config)
+  if (!sentryInstance && config.dsn) {
+    // Init Sentry
+    sentryInstance = Sentry
+    Sentry.init(config)
+  }
 
   // Return middleware resolver
-  return async function(resolve, parent, args, ctx, info) {
+  return async (resolve, parent, args, ctx, info) => {
     try {
       const res = await resolve(parent, args, ctx, info)
       if (captureReturnedErrors && res instanceof Error) {
-        captureException(res, ctx, withScope)
+        captureException(sentryInstance, res, ctx, withScope)
       }
       return res
-    } catch (err) {
-      captureException(err, ctx, withScope)
+    } catch (error) {
+      captureException(sentryInstance, error, ctx, withScope)
 
       // Forward error
       if (forwardErrors) {
-        throw err
+        throw error
       }
     }
   }
 }
 
 function captureException<Context>(
-  err,
+  sentryInstance,
+  error: Error,
   ctx: Context,
   withScope: ExceptionScope<Context>,
 ) {
-  Sentry.withScope(scope => {
-    withScope(scope, err, ctx)
-    Sentry.captureException(err)
+  sentryInstance.withScope(scope => {
+    withScope(scope, error, ctx)
+    sentryInstance.captureException(error)
   })
 }

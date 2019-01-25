@@ -32,8 +32,7 @@ const resolvers = {
 const sentryMiddleware = sentry({
   config: {
     dsn: process.env.SENTRY_DSN,
-    environment: process.env.NODE_ENV,
-    release: process.env.npm_package_version
+    environment: process.env.NODE_ENV
   },
   withScope: (scope, error, context) => {
     scope.setUser({
@@ -54,11 +53,31 @@ const server = GraphQLServer({
 serve.start(() => `Server running on http://localhost:4000`)
 ```
 
+### Using a Sentry instance
+
+In cases where you want to use your own instance of Sentry to use it in other places in your application you can pass the `sentryInstance`. The `config` property should not be passed as an option.
+
+#### Example usage with a Sentry instance
+
+```ts
+Sentry.init({
+  dsn: process.env.SENTRY_DSN,
+})
+
+const sentryMiddleware = sentry({
+  sentryInstance: Sentry,
+  withScope: (scope, error, context) => {
+    scope.setExtra('origin', context.request.headers.origin)
+  },
+})
+```
+
 ## API & Configuration
 
 ```ts
 export interface Options<Context> {
-  config: Sentry.NodeOptions
+  sentryInstance?: Sentry
+  config?: Sentry.NodeOptions
   withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
@@ -77,7 +96,7 @@ The `withScope` option is a function that is called with the current Sentry scop
 ```ts
 type ExceptionScope<Context> = (
   scope: Sentry.Scope,
-  error: any,
+  error: Error,
   context: Context,
 ) => void
 ```
@@ -86,10 +105,15 @@ type ExceptionScope<Context> = (
 
 | property                | required | description                                                                                                                                                                |
 | ----------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `config`                | true     | [Sentry's config object](https://docs.sentry.io/error-reporting/configuration/?platform=node)                                                                              |
+| `sentryInstance`        | false    | [Sentry's instance](https://docs.sentry.io/error-reporting/configuration/?platform=node)                                                                                   |
+| `config`                | false    | [Sentry's config object](https://docs.sentry.io/error-reporting/configuration/?platform=node)                                                                              |
 | `withScope`             | false    | Function to modify the [Sentry context](https://docs.sentry.io/enriching-error-data/context/?platform=node) to send with the captured error.                               |
 | `captureReturnedErrors` | false    | Capture errors returned from other middlewares, e.g., `graphql-shield` [returns errors](https://github.com/maticzav/graphql-shield#custom-errors) from rules and resolvers |
 | `forwardErrors`         | false    | Should middleware forward errors to the client or block them.                                                                                                              |
+
+#### Note
+
+If `sentryInstance` is not passed then `config.dsn` is required and vice-versa.
 
 ## License
 
