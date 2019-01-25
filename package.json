@@ -17,7 +17,18 @@
     "test": "npm run lint && npm run build",
     "semantic-release": "semantic-release"
   },
-  "author": "Matic Zavadlal <matic.zavadlal@gmail.com>",
+  "contributors": [
+    {
+      "name": "Matic Zavadlal",
+      "email": "matic.zavadlal@gmail.com",
+      "url": "https://github.com/maticzav"
+    },
+    {
+      "name": "Bruno Scheufler",
+      "email": "bruno@brunoscheufler.com",
+      "url": "https://github.com/BrunoScheufler"
+    }
+  ],
   "devDependencies": {
     "@sentry/node": "4.5.3",
     "@types/lodash": "4.14.120",
@@ -36,7 +47,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/maticzav/graphql-middleware-sentry.git"
+    "url": "https://github.com/BrunoScheufler/graphql-middleware-sentry.git"
   },
   "peerDependencies": {
     "@sentry/node": "^4.5.0",
