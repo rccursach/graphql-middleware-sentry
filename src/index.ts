@@ -17,12 +17,6 @@ export interface Options<Context> {
   reportError?: (res) => boolean
 }
 
-function containsIgnoredError(res, ignoredErrors) {
-  ignoredErrors.some(error => {
-    return res instanceof error;
-  });
-}
-
 export class SentryError extends Error {}
 
 export const sentry = <Context>({
@@ -45,13 +39,15 @@ export const sentry = <Context>({
     try {
       const res = await resolve(parent, args, ctx, info)
 
-      if (reportError && reportError(res)) {
+      if (reportError && !reportError(res)) {
+        // if there's a report error function but it returns false, ignore the error
         return res;
       }
 
       if (captureReturnedErrors && res instanceof Error) {
         captureException(res, ctx, withScope)
       }
+
       return res
     } catch (err) {
       captureException(err, ctx, withScope)
