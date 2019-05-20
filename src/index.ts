@@ -62,7 +62,7 @@ function captureException<Context>(
   withScope: ExceptionScope<Context>,
   reportError?: (res) => boolean,
 ) {
-  if (reportError && !reportError(err)) {
+  if (reportError && reportError(err) || !reportError) {
     Sentry.withScope(scope => {
       withScope(scope, err, ctx)
       Sentry.captureException(err)
