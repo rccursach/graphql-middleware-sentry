@@ -62,7 +62,7 @@ export interface Options<Context> {
   withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
-  reportError?: (res) => boolean
+  reportError?: (res: Error | any) => boolean
 }
 
 function sentry<Context>(options: Options<Context>): IMiddlewareFunction

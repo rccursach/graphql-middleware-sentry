@@ -6,6 +6,7 @@ export type ExceptionScope<Context> = (
   scope: Sentry.Scope,
   error: any,
   context: Context,
+  reportError?: (res) => boolean
 ) => void
 
 // Options for graphql-middleware-sentry
@@ -14,7 +15,7 @@ export interface Options<Context> {
   withScope?: ExceptionScope<Context>
   captureReturnedErrors?: boolean
   forwardErrors?: boolean
-  reportError?: (res) => boolean
+  reportError?: (res: Error | any) => boolean
 }
 
 export class SentryError extends Error {}
@@ -39,18 +40,13 @@ export const sentry = <Context>({
     try {
       const res = await resolve(parent, args, ctx, info)
 
-      if (reportError && !reportError(res)) {
-        // if there's a report error function but it returns false, ignore the error
-        return res;
-      }
-
       if (captureReturnedErrors && res instanceof Error) {
-        captureException(res, ctx, withScope)
+        captureException(res, ctx, withScope, reportError)
       }
 
       return res
     } catch (err) {
-      captureException(err, ctx, withScope)
+      captureException(err, ctx, withScope, reportError)
 
       // Forward error
       if (forwardErrors) {
@@ -64,9 +60,12 @@ function captureException<Context>(
   err,
   ctx: Context,
   withScope: ExceptionScope<Context>,
+  reportError?: (res) => boolean,
 ) {
-  Sentry.withScope(scope => {
-    withScope(scope, err, ctx)
-    Sentry.captureException(err)
-  })
+  if (reportError && !reportError(err)) {
+    Sentry.withScope(scope => {
+      withScope(scope, err, ctx)
+      Sentry.captureException(err)
+    })
+  }
 }
