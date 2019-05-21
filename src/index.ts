@@ -6,7 +6,7 @@ export type ExceptionScope<Context> = (
   scope: Sentry.Scope,
   error: Error,
   context: Context,
-  reportError?: (res: Error | any) => boolean
+  reportError?: (res: Error | any) => boolean,
 ) => void
 
 // Options for graphql-middleware-sentry
@@ -27,7 +27,7 @@ export const sentry = <Context>({
   withScope,
   captureReturnedErrors = false,
   forwardErrors = false,
-  reportError
+  reportError,
 }: Options<Context>): IMiddlewareFunction => {
   // Check if either sentryInstance or config.dsn is present
   if (!sentryInstance && !config.dsn) {
@@ -70,7 +70,7 @@ function captureException<Context>(
   withScope: ExceptionScope<Context>,
   reportError?: (res) => boolean,
 ) {
-  if (reportError && reportError(error) || reportError === undefined) {
+  if ((reportError && reportError(error)) || reportError === undefined) {
     sentryInstance.withScope(scope => {
       withScope(scope, error, ctx)
       sentryInstance.captureException(error)
