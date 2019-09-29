@@ -24,7 +24,7 @@ export class SentryError extends Error {}
 export const sentry = <Context>({
   sentryInstance = null,
   config = {},
-  withScope,
+  withScope = () => {},
   captureReturnedErrors = false,
   forwardErrors = false,
   reportError,
