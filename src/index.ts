@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/node'
 
-import { IMiddlewareFunction } from 'graphql-middleware/dist/types'
+import { IMiddlewareFunction } from 'graphql-middleware'
 
 export type ExceptionScope<Context> = (
   scope: Sentry.Scope,
