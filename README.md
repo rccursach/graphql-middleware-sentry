@@ -50,7 +50,7 @@ const server = GraphQLServer({
   middlewares: [sentryMiddleware]
 })
 
-serve.start(() => `Server running on http://localhost:4000`)
+server.start(() => `Server running on http://localhost:4000`)
 ```
 
 ### Using a Sentry instance
