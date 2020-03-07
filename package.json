@@ -30,9 +30,9 @@
     }
   ],
   "devDependencies": {
-    "@sentry/node": "5.12.5",
+    "@sentry/node": "5.13.2",
     "@types/lodash": "4.14.149",
-    "@types/node": "13.7.6",
+    "@types/node": "13.9.0",
     "graphql": "14.6.0",
     "graphql-middleware": "4.0.2",
     "prettier": "1.19.1",
@@ -42,7 +42,7 @@
     "tslint": "5.20.1",
     "tslint-config-prettier": "1.18.0",
     "tslint-config-standard": "9.0.0",
-    "typescript": "3.8.2"
+    "typescript": "3.8.3"
   },
   "license": "MIT",
   "repository": {
