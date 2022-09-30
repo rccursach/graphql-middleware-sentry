@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/node';
+import { GraphQLResolveInfo } from 'graphql';
 
 import { IMiddlewareFunction } from 'graphql-middleware';
 
@@ -8,9 +9,29 @@ function captureException<Context>(
   ctx: Context,
   withScope: ExceptionScope<Context>,
   reportError?: (res) => boolean,
+  info?: GraphQLResolveInfo,
 ) {
   if ((reportError && reportError(error)) || reportError === undefined) {
+    // try to get operation name
+    let operationName = 'unknown_operation';
+    if (
+      ['Query', 'Mutation'].includes(String(info.parentType)) &&
+      !info.fieldName.startsWith('_') &&
+      info.operation.name?.value
+    ) {
+      operationName = info.operation.name?.value;
+    }
     sentryInstance.withScope(scope => {
+      try {
+        scope.setContext('Operation_Info', {
+          operationName,
+        });
+      } catch (err) {
+        console.log(
+          `scope.setContext for Error in ${operationName} :`,
+          err.message,
+        );
+      }
       withScope(scope, error, ctx);
       sentryInstance.captureException(error);
     });
@@ -63,12 +84,26 @@ export const sentry = <Context>({
       const res = await resolve(parent, args, ctx, info);
 
       if (captureReturnedErrors && res instanceof Error) {
-        captureException(sentryInstance, res, ctx, withScope, reportError);
+        captureException(
+          sentryInstance,
+          res,
+          ctx,
+          withScope,
+          reportError,
+          info,
+        );
       }
 
       return res;
     } catch (error) {
-      captureException(sentryInstance, error, ctx, withScope, reportError);
+      captureException(
+        sentryInstance,
+        error,
+        ctx,
+        withScope,
+        reportError,
+        info,
+      );
 
       // Forward error
       if (forwardErrors) {
